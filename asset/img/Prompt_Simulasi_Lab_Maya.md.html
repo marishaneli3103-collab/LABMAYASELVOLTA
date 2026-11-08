@@ -1,0 +1,643 @@
+--- BLOK A: CSS ---
+<style>
+/* Reset & Base */
+#sim-volta-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    background-color: var(--bg-0, #f8f9fa);
+    color: var(--ink, #1e293b);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#sim-volta-wrap * {
+    box-sizing: inherit;
+}
+
+/* Scrollbar Styling untuk Panel */
+.sim-volta-scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+.sim-volta-scrollable::-webkit-scrollbar-track {
+    background: var(--bg-0, #f1f5f9);
+}
+.sim-volta-scrollable::-webkit-scrollbar-thumb {
+    background: var(--line, #cbd5e1);
+    border-radius: 4px;
+}
+
+/* Panel Kiri - Input & Kontrol */
+.sim-volta-panel-left {
+    width: 20%;
+    height: 100%;
+    padding: 1.5rem 1rem;
+    background-color: var(--bg-1, #ffffff);
+    border-right: 1px solid var(--panel-edge, #e2e8f0);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Panel Tengah - Canvas Utama */
+.sim-volta-panel-center {
+    width: 55%;
+    height: 100%;
+    position: relative;
+    background-color: var(--bg-0, #f8f9fa);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#sim-volta-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Panel Kanan - Output & Data */
+.sim-volta-panel-right {
+    width: 25%;
+    height: 100%;
+    padding: 1.5rem 1rem;
+    background-color: var(--bg-1, #ffffff);
+    border-left: 1px solid var(--panel-edge, #e2e8f0);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Typografi & Form Element */
+.sim-volta-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--ink, #0f172a);
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid var(--cyan-dim, #bae6fd);
+    padding-bottom: 0.5rem;
+}
+
+.sim-volta-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sim-volta-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink-dim, #475569);
+}
+
+.sim-volta-select {
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--line, #cbd5e1);
+    border-radius: 6px;
+    background-color: var(--bg-0, #f8f9fa);
+    color: var(--ink, #0f172a);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.sim-volta-select:focus {
+    border-color: var(--cyan, #0284c7);
+}
+
+.sim-volta-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.sim-volta-btn {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.sim-volta-btn-primary {
+    background-color: var(--cyan, #0284c7);
+    color: #ffffff;
+}
+.sim-volta-btn-primary:hover {
+    background-color: var(--cyan-dim, #0369a1);
+}
+
+.sim-volta-btn-secondary {
+    background-color: var(--bg-0, #e2e8f0);
+    color: var(--ink, #1e293b);
+}
+.sim-volta-btn-secondary:hover {
+    background-color: var(--line, #cbd5e1);
+}
+
+/* Card Output */
+.sim-volta-card {
+    background-color: var(--bg-0, #f8f9fa);
+    border: 1px solid var(--panel-edge, #e2e8f0);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sim-volta-card-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink-dim, #64748b);
+    letter-spacing: 0.05em;
+}
+
+.sim-volta-card-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--cyan, #0284c7);
+}
+
+.sim-volta-card-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--ink, #1e293b);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* Pesan Peringatan */
+#sim-volta-warning {
+    display: none;
+    color: var(--red, #ef4444);
+    font-size: 0.85rem;
+    font-weight: 600;
+    background-color: #fef2f2;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #fca5a5;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+</style>
+--- BLOK B: HTML ---
+<div id="sim-volta-wrap">
+    <!-- PANEL KIRI: Kontrol Input -->
+    <div class="sim-volta-panel-left sim-volta-scrollable">
+        <div class="sim-volta-title">Konfigurasi Sel</div>
+        
+        <div class="sim-volta-form-group">
+            <label class="sim-volta-label" for="sim-volta-anode">Anoda (-) / Oksidasi</label>
+            <select id="sim-volta-anode" class="sim-volta-select"></select>
+        </div>
+
+        <div class="sim-volta-form-group">
+            <label class="sim-volta-label" for="sim-volta-cathode">Katoda (+) / Reduksi</label>
+            <select id="sim-volta-cathode" class="sim-volta-select"></select>
+        </div>
+
+        <div id="sim-volta-warning">Reaksi Tidak Spontan!</div>
+
+        <div class="sim-volta-btn-group">
+            <button id="sim-volta-btn-start" class="sim-volta-btn sim-volta-btn-primary">Mulai Simulasi</button>
+            <button id="sim-volta-btn-reset" class="sim-volta-btn sim-volta-btn-secondary">Reset</button>
+        </div>
+    </div>
+
+    <!-- PANEL TENGAH: Simulasi Canvas -->
+    <div class="sim-volta-panel-center">
+        <canvas id="sim-volta-canvas"></canvas>
+    </div>
+
+    <!-- PANEL KANAN: Data Output -->
+    <div class="sim-volta-panel-right sim-volta-scrollable">
+        <div class="sim-volta-title">Data Pengamatan</div>
+        
+        <div class="sim-volta-card">
+            <div class="sim-volta-card-title">Potensial Sel (E° sel)</div>
+            <div id="sim-volta-out-potensial" class="sim-volta-card-value">0.00 V</div>
+        </div>
+
+        <div class="sim-volta-card">
+            <div class="sim-volta-card-title">Massa Endapan Katoda</div>
+            <div id="sim-volta-out-massa" class="sim-volta-card-value">0.000 g</div>
+        </div>
+
+        <div class="sim-volta-card">
+            <div class="sim-volta-card-title">Diagram Sel</div>
+            <div id="sim-volta-out-diagram" class="sim-volta-card-text">-</div>
+        </div>
+
+        <div class="sim-volta-card">
+            <div class="sim-volta-card-title">Notasi Reaksi Sel</div>
+            <div id="sim-volta-out-notasi" class="sim-volta-card-text">-</div>
+        </div>
+    </div>
+</div>
+--- BLOK C: JAVASCRIPT ---
+<script>
+const simVoltaMetals = {
+    'Mg': { name: 'Magnesium', symbol: 'Mg', ion: 'Mg²⁺', e: -2.37, color: '#d0d2d6', liquid: 'rgba(230, 230, 230, 0.2)', valency: 2 },
+    'Al': { name: 'Aluminium', symbol: 'Al', ion: 'Al³⁺', e: -1.66, color: '#e2e2e2', liquid: 'rgba(230, 230, 230, 0.2)', valency: 3 },
+    'Zn': { name: 'Seng', symbol: 'Zn', ion: 'Zn²⁺', e: -0.76, color: '#a0a5ad', liquid: 'rgba(230, 230, 230, 0.2)', valency: 2 },
+    'Fe': { name: 'Besi', symbol: 'Fe', ion: 'Fe²⁺', e: -0.44, color: '#8c8c8c', liquid: 'rgba(180, 230, 180, 0.3)', valency: 2 },
+    'Pb': { name: 'Timbal', symbol: 'Pb', ion: 'Pb²⁺', e: -0.13, color: '#6d757d', liquid: 'rgba(230, 230, 230, 0.2)', valency: 2 },
+    'Cu': { name: 'Tembaga', symbol: 'Cu', ion: 'Cu²⁺', e: 0.34, color: '#b87333', liquid: 'rgba(50, 150, 255, 0.4)', valency: 2 },
+    'Ag': { name: 'Perak', symbol: 'Ag', ion: 'Ag⁺', e: 0.80, color: '#e0e0e0', liquid: 'rgba(230, 230, 230, 0.2)', valency: 1 }
+};
+
+let simVoltaState = {
+    isRunning: false,
+    anode: 'Zn',
+    cathode: 'Cu',
+    time: 0,
+    lastTime: 0,
+    reqId: null,
+    eCell: 0,
+    isSpontaneous: true
+};
+
+let simVoltaCanvas, simVoltaCtx;
+const SIM_VOLTA_CW = 704;
+const SIM_VOLTA_CH = 666;
+
+function simVoltaInit() {
+    simVoltaCanvas = document.getElementById('sim-volta-canvas');
+    simVoltaCtx = simVoltaCanvas.getContext('2d');
+    
+    // Inisialisasi Dropdown
+    const selectAnode = document.getElementById('sim-volta-anode');
+    const selectCathode = document.getElementById('sim-volta-cathode');
+    
+    for (const key in simVoltaMetals) {
+        let opt1 = document.createElement('option');
+        opt1.value = key;
+        opt1.text = `${simVoltaMetals[key].name} (${simVoltaMetals[key].symbol})`;
+        selectAnode.appendChild(opt1);
+        
+        let opt2 = document.createElement('option');
+        opt2.value = key;
+        opt2.text = `${simVoltaMetals[key].name} (${simVoltaMetals[key].symbol})`;
+        selectCathode.appendChild(opt2);
+    }
+    
+    // Set Nilai Awal
+    selectAnode.value = 'Zn';
+    selectCathode.value = 'Cu';
+
+    // Event Listeners
+    selectAnode.addEventListener('change', (e) => {
+        simVoltaState.anode = e.target.value;
+        simVoltaReset();
+    });
+    
+    selectCathode.addEventListener('change', (e) => {
+        simVoltaState.cathode = e.target.value;
+        simVoltaReset();
+    });
+
+    document.getElementById('sim-volta-btn-start').addEventListener('click', simVoltaToggleStart);
+    document.getElementById('sim-volta-btn-reset').addEventListener('click', simVoltaReset);
+    window.addEventListener('resize', simVoltaResize);
+
+    simVoltaResize();
+    simVoltaUpdateData();
+    simVoltaDraw();
+}
+
+function simVoltaUpdateData() {
+    let anode = simVoltaMetals[simVoltaState.anode];
+    let cathode = simVoltaMetals[simVoltaState.cathode];
+    
+    // Hitung Potensial
+    simVoltaState.eCell = cathode.e - anode.e;
+    simVoltaState.isSpontaneous = simVoltaState.eCell > 0;
+    
+    // Update UI Teks
+    document.getElementById('sim-volta-out-potensial').textContent = 
+        (simVoltaState.eCell > 0 ? '+' : '') + simVoltaState.eCell.toFixed(2) + ' V';
+    
+    let warningEl = document.getElementById('sim-volta-warning');
+    if (!simVoltaState.isSpontaneous && simVoltaState.eCell !== 0) {
+        warningEl.style.display = 'block';
+    } else {
+        warningEl.style.display = 'none';
+    }
+
+    // Diagram Sel
+    document.getElementById('sim-volta-out-diagram').textContent = 
+        `${anode.symbol}(s) | ${anode.ion}(aq) || ${cathode.ion}(aq) | ${cathode.symbol}(s)`;
+
+    // Penyetaraan Reaksi (Sederhana berdasarkan KPK valensi)
+    let gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    let lcm = (a, b) => (a * b) / gcd(a, b);
+    
+    let vA = anode.valency;
+    let vC = cathode.valency;
+    let m = lcm(vA, vC);
+    let cA = m / vA; 
+    let cC = m / vC; 
+
+    let strAs = cA === 1 ? anode.symbol : cA + anode.symbol;
+    let strCion = cC === 1 ? cathode.ion : cC + cathode.ion;
+    let strAion = cA === 1 ? anode.ion : cA + anode.ion;
+    let strCs = cC === 1 ? cathode.symbol : cC + cathode.symbol;
+    
+    document.getElementById('sim-volta-out-notasi').textContent = 
+        `${strAs}(s) + ${strCion}(aq) ➔ ${strAion}(aq) + ${strCs}(s)`;
+}
+
+function simVoltaToggleStart() {
+    let btn = document.getElementById('sim-volta-btn-start');
+    if (simVoltaState.isRunning) {
+        simVoltaState.isRunning = false;
+        btn.textContent = "Lanjutkan Simulasi";
+        cancelAnimationFrame(simVoltaState.reqId);
+    } else {
+        if (!simVoltaState.isSpontaneous || simVoltaState.eCell === 0) {
+            // Animasi tidak jalan jika tidak spontan
+            simVoltaDraw();
+            return;
+        }
+        simVoltaState.isRunning = true;
+        simVoltaState.lastTime = performance.now();
+        btn.textContent = "Jeda Simulasi";
+        btn.classList.replace('sim-volta-btn-primary', 'sim-volta-btn-secondary');
+        simVoltaLoop(performance.now());
+    }
+}
+
+function simVoltaReset() {
+    simVoltaState.isRunning = false;
+    simVoltaState.time = 0;
+    cancelAnimationFrame(simVoltaState.reqId);
+    
+    let btn = document.getElementById('sim-volta-btn-start');
+    btn.textContent = "Mulai Simulasi";
+    btn.classList.replace('sim-volta-btn-secondary', 'sim-volta-btn-primary');
+    
+    document.getElementById('sim-volta-out-massa').textContent = "0.000 g";
+    
+    simVoltaUpdateData();
+    simVoltaDraw();
+}
+
+function simVoltaResize() {
+    const container = document.querySelector('.sim-volta-panel-center');
+    simVoltaCanvas.width = container.clientWidth;
+    simVoltaCanvas.height = container.clientHeight;
+    simVoltaDraw();
+}
+
+function simVoltaLoop(timestamp) {
+    if (!simVoltaState.isRunning) return;
+    
+    let dt = timestamp - simVoltaState.lastTime;
+    simVoltaState.lastTime = timestamp;
+    
+    // Update waktu (maksimal hingga mass change tertentu)
+    if (simVoltaState.time < 30000) { 
+        simVoltaState.time += dt;
+        let mass = (simVoltaState.time / 30000) * 2.5; // Max 2.5g
+        document.getElementById('sim-volta-out-massa').textContent = mass.toFixed(3) + " g";
+    }
+
+    simVoltaDraw();
+    simVoltaState.reqId = requestAnimationFrame(simVoltaLoop);
+}
+
+function simVoltaDraw() {
+    const W = simVoltaCanvas.width;
+    const H = simVoltaCanvas.height;
+    
+    simVoltaCtx.clearRect(0, 0, W, H);
+    simVoltaCtx.save();
+    
+    // Skala kanvas agar responsif
+    const scale = Math.min(W / SIM_VOLTA_CW, H / SIM_VOLTA_CH);
+    simVoltaCtx.translate((W - SIM_VOLTA_CW * scale) / 2, (H - SIM_VOLTA_CH * scale) / 2);
+    simVoltaCtx.scale(scale, scale);
+
+    const anode = simVoltaMetals[simVoltaState.anode];
+    const cathode = simVoltaMetals[simVoltaState.cathode];
+    
+    // Faktor perubahan visual
+    let massFactor = simVoltaState.isRunning ? Math.min(1, simVoltaState.time / 30000) : 0;
+    
+    // 1. Gambar Cairan dan Gelas Kimia (Beaker)
+    simVoltaDrawBeaker(120, 320, 160, 220, anode.liquid);
+    simVoltaDrawBeaker(424, 320, 160, 220, cathode.liquid);
+
+    // 2. Gambar Jembatan Garam
+    simVoltaDrawSaltBridge(240, 460, 464, 460, 260);
+
+    // 3. Gambar Elektroda
+    // Anoda menipis
+    let anodeW = 40 - (massFactor * 20);
+    let anodeX = 180 + (40 - anodeW)/2;
+    simVoltaCtx.fillStyle = anode.color;
+    simVoltaCtx.fillRect(anodeX, 220, anodeW, 200);
+    simVoltaCtx.strokeRect(anodeX, 220, anodeW, 200);
+    
+    // Katoda menebal
+    let cathodeW = 40 + (massFactor * 20);
+    let cathodeX = 484 - (cathodeW - 40)/2;
+    simVoltaCtx.fillStyle = cathode.color;
+    simVoltaCtx.fillRect(cathodeX, 220, cathodeW, 200);
+    simVoltaCtx.strokeRect(cathodeX, 220, cathodeW, 200);
+
+    // Label Elektroda
+    simVoltaCtx.fillStyle = "#000";
+    simVoltaCtx.font = "bold 16px sans-serif";
+    simVoltaCtx.textAlign = "center";
+    simVoltaCtx.fillText(`(-) ${anode.symbol}`, 200, 200);
+    simVoltaCtx.fillText(`(+) ${cathode.symbol}`, 504, 200);
+
+    // 4. Gambar Kabel
+    simVoltaCtx.beginPath();
+    simVoltaCtx.moveTo(200, 220);
+    simVoltaCtx.lineTo(200, 140);
+    simVoltaCtx.lineTo(302, 140);
+    simVoltaCtx.moveTo(402, 140);
+    simVoltaCtx.lineTo(504, 140);
+    simVoltaCtx.lineTo(504, 220);
+    simVoltaCtx.lineWidth = 4;
+    simVoltaCtx.strokeStyle = "#475569";
+    simVoltaCtx.stroke();
+
+    // 5. Gambar Voltmeter
+    simVoltaDrawMeter(352, 140, 50, simVoltaState.isRunning ? simVoltaState.eCell : 0);
+
+    // 6. Animasi Partikel (Elektron & Ion)
+    if (simVoltaState.isRunning && simVoltaState.isSpontaneous && simVoltaState.eCell > 0) {
+        simVoltaDrawParticles();
+    }
+
+    simVoltaCtx.restore();
+}
+
+function simVoltaDrawBeaker(x, y, w, h, liquidColor) {
+    // Cairan
+    simVoltaCtx.fillStyle = liquidColor;
+    simVoltaCtx.fillRect(x + 5, y + 50, w - 10, h - 55);
+
+    // Kaca Beaker
+    simVoltaCtx.beginPath();
+    simVoltaCtx.moveTo(x, y);
+    simVoltaCtx.lineTo(x, y + h);
+    simVoltaCtx.lineTo(x + w, y + h);
+    simVoltaCtx.lineTo(x + w, y);
+    simVoltaCtx.lineWidth = 4;
+    simVoltaCtx.strokeStyle = "rgba(148, 163, 184, 0.8)"; // Warna glass
+    simVoltaCtx.stroke();
+    
+    // Kilap kaca
+    simVoltaCtx.fillStyle = "rgba(255, 255, 255, 0.3)";
+    simVoltaCtx.fillRect(x + 10, y + 20, 10, h - 30);
+}
+
+function simVoltaDrawSaltBridge(x1, y1, x2, y2, topY) {
+    simVoltaCtx.beginPath();
+    simVoltaCtx.moveTo(x1, y1);
+    simVoltaCtx.lineTo(x1, topY);
+    simVoltaCtx.quadraticCurveTo(x1, topY-20, x1+20, topY-20);
+    simVoltaCtx.lineTo(x2-20, topY-20);
+    simVoltaCtx.quadraticCurveTo(x2, topY-20, x2, topY);
+    simVoltaCtx.lineTo(x2, y2);
+    
+    simVoltaCtx.lineWidth = 24;
+    simVoltaCtx.strokeStyle = "rgba(226, 232, 240, 0.9)";
+    simVoltaCtx.lineCap = "round";
+    simVoltaCtx.stroke();
+    
+    // Garis outline jembatan
+    simVoltaCtx.lineWidth = 26;
+    simVoltaCtx.strokeStyle = "#94a3b8";
+    simVoltaCtx.stroke();
+    
+    simVoltaCtx.lineWidth = 22;
+    simVoltaCtx.strokeStyle = "rgba(241, 245, 249, 0.9)";
+    simVoltaCtx.stroke();
+}
+
+function simVoltaDrawMeter(x, y, r, volts) {
+    // Badan Meter
+    simVoltaCtx.beginPath();
+    simVoltaCtx.arc(x, y, r, 0, 2*Math.PI);
+    simVoltaCtx.fillStyle = "#f8fafc";
+    simVoltaCtx.fill();
+    simVoltaCtx.lineWidth = 4;
+    simVoltaCtx.strokeStyle = "#334155";
+    simVoltaCtx.stroke();
+
+    simVoltaCtx.fillStyle = "#0f172a";
+    simVoltaCtx.font = "bold 16px sans-serif";
+    simVoltaCtx.textAlign = "center";
+    simVoltaCtx.fillText("V", x, y + 25);
+
+    // Jarum
+    // Map tegangan 0 -> -90 deg, ~3V -> 0 deg (ke kanan)
+    let angle = -Math.PI/2; 
+    if (volts > 0) {
+        angle += Math.min((volts / 3.0) * (Math.PI/2), Math.PI/2);
+    } else if (volts < 0) {
+        angle -= Math.min((Math.abs(volts) / 3.0) * (Math.PI/2), Math.PI/2);
+    }
+
+    simVoltaCtx.beginPath();
+    simVoltaCtx.moveTo(x, y);
+    simVoltaCtx.lineTo(x + Math.cos(angle)*r*0.75, y + Math.sin(angle)*r*0.75);
+    simVoltaCtx.lineWidth = 3;
+    simVoltaCtx.strokeStyle = "#ef4444"; // Merah
+    simVoltaCtx.lineCap = "round";
+    simVoltaCtx.stroke();
+
+    // Pusat jarum
+    simVoltaCtx.beginPath();
+    simVoltaCtx.arc(x, y, 5, 0, 2*Math.PI);
+    simVoltaCtx.fillStyle = "#0f172a";
+    simVoltaCtx.fill();
+}
+
+function simVoltaDrawParticles() {
+    let t = simVoltaState.time;
+    
+    // 1. Elektron bergerak di kabel (Kiri ke Kanan)
+    let pathE = [
+        {x: 200, y: 220}, {x: 200, y: 140}, {x: 302, y: 140}, 
+        {x: 402, y: 140}, {x: 504, y: 140}, {x: 504, y: 220}
+    ];
+    let totalLenE = 80 + 102 + 100 + 102 + 80; // perkiraan panjang
+    
+    simVoltaCtx.fillStyle = "#facc15"; // Kuning elektron
+    for (let i = 0; i < 5; i++) {
+        let prog = ((t * 0.15) + (i * 100)) % 464; 
+        let pos = simVoltaGetPathPos(pathE, prog / 464);
+        if (pos.x > 302 && pos.x < 402) continue; // Sembunyikan di dalam voltmeter
+        
+        simVoltaCtx.beginPath();
+        simVoltaCtx.arc(pos.x, pos.y, 4, 0, 2*Math.PI);
+        simVoltaCtx.fill();
+        simVoltaCtx.stroke();
+    }
+
+    simVoltaCtx.fillStyle = "#000";
+    simVoltaCtx.font = "12px sans-serif";
+    simVoltaCtx.fillText("e⁻", 250, 130);
+    simVoltaCtx.fillText("e⁻", 450, 130);
+
+    // 2. Ion di Jembatan Garam (NO3- ke kiri, K+ ke kanan)
+    let progSB = (t * 0.05) % 100 / 100;
+    
+    // Ion K+ ke Katoda (Kanan)
+    let kX = 352 + progSB * 112; 
+    simVoltaCtx.fillStyle = "#38bdf8";
+    simVoltaCtx.fillText("K⁺", kX, 245);
+    
+    // Ion NO3- ke Anoda (Kiri)
+    let noX = 352 - progSB * 112;
+    simVoltaCtx.fillStyle = "#f87171";
+    simVoltaCtx.fillText("NO₃⁻", noX, 245);
+    
+    // 3. Ion terlepas di Anoda (Animasi pelarutan)
+    simVoltaCtx.fillStyle = "#475569";
+    let dissolveY = 380 + (t*0.05 % 60);
+    simVoltaCtx.fillText(simVoltaMetals[simVoltaState.anode].ion, 240, dissolveY);
+
+    // 4. Ion menempel di Katoda (Animasi pengendapan)
+    let plateY = 440 - (t*0.05 % 60);
+    simVoltaCtx.fillText(simVoltaMetals[simVoltaState.cathode].ion, 444, plateY);
+}
+
+function simVoltaGetPathPos(pts, t) {
+    let len = pts.length - 1;
+    let scaledT = t * len;
+    let index = Math.floor(scaledT);
+    if (index >= len) index = len - 1;
+    let localT = scaledT - index;
+    
+    let p1 = pts[index];
+    let p2 = pts[index+1];
+    
+    return {
+        x: p1.x + (p2.x - p1.x) * localT,
+        y: p1.y + (p2.y - p1.y) * localT
+    };
+}
+
+// Pasang hook inisialisasi
+document.addEventListener('DOMContentLoaded', simVoltaInit);
+
+</script>
